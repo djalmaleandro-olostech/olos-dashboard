@@ -1,33 +1,26 @@
-# Noxus (front-end)
+# OlosDash
 
-Sistema Gerenciador
+Sistema de Métricas
 
-## Install the dependencies
+## Instale as dependencias
 ```bash
 yarn
 # or
 npm install
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+### Inicie o App
 ```bash
-quasar dev
+npm run dev
 ```
 
-
-### Lint the files
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-
-
-### Build the app for production
+### Builde o app em Prod
 ```bash
 quasar build
 ```
 
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+### Quasar Docs
+https://quasar.dev/docs
+
+### Vuejs Docs
+https://vuejs.org/guide/introduction

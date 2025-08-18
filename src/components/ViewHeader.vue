@@ -5,6 +5,7 @@
                 {{ title }}
             </span>
             <q-btn
+                v-if="btnName"
                 color="primary"
                 :icon="btnIcon"
                 :label="btnName"

@@ -12,6 +12,12 @@ const routes = [
                 component: () => import('src/pages/HomePage.vue')
             },
             {
+                path: 'my-account',
+                name: 'myAccount',
+                props: true,
+                component: () => import('src/pages/MyAccount.vue')
+            },
+            {
                 path: 'users',
                 name: 'users',
                 component: () => import('src/pages/UsersPage.vue')
@@ -61,6 +67,12 @@ const routes = [
                 name: 'employeesForm',
                 component: () => import('src/pages/EmployeesForm.vue')
             },
+            {
+                path: 'metrics',
+                name: 'metrics',
+                component: () => import('src/pages/MetricsPage.vue')
+            },
+
         ]
     },
     {

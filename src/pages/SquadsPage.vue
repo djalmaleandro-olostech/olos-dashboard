@@ -11,6 +11,7 @@
             <template v-slot:body-cell-actions="props">
                 <q-td :props="props" class="q-gutter-sm">
                     <q-btn
+                        v-if="true == false"
                         :icon="props.row.status.name === 'Ativo' ? 'toggle_on' : 'toggle_off'"
                         color="secondary"
                         dense size="sm"

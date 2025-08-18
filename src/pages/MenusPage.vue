@@ -11,31 +11,32 @@
             <template v-slot:body-cell-actions="props">
                 <q-td :props="props" class="q-gutter-sm">
                     <q-btn
+                        v-if="true == false"
                         :icon="props.row.status.name === 'Ativo' ? 'toggle_on' : 'toggle_off'"
-                        :color="props.row.status.name === 'Ativo' ? 'positive' : 'negative'"
+                        color="secondary"
                         dense size="sm"
                         @click="handleChangeStatus(props.row.id)">
-                        <q-tooltip class="bg-accent">
+                        <q-tooltip class="bg-secondary">
                             {{ props.row.status.name === 'Ativo' ? 'Inativar' : 'Ativar' }}
                         </q-tooltip>
                     </q-btn>
                     <q-btn
                         icon="edit"
-                        color="warning"
+                        color="secondary"
                         dense size="sm"
                         @click="handleEditMenu(props.row.id)"
                     >
-                        <q-tooltip class="bg-accent">
+                        <q-tooltip class="bg-secondary">
                             Editar
                         </q-tooltip>
                     </q-btn>
                     <q-btn
                         icon="delete"
-                        color="negative"
+                        color="secondary"
                         dense size="sm"
                         @click="handleDestroy(props.row.id)"
                     >
-                        <q-tooltip class="bg-accent">Excluir</q-tooltip>
+                        <q-tooltip class="bg-secondary">Excluir</q-tooltip>
                     </q-btn>
                 </q-td>
 
@@ -112,9 +113,9 @@ export default defineComponent({
                 align: 'left'
             },
             {
-                label: 'Exclusivo Noxus',
-                field: 'exclusive_noxus',
-                field: row => row.exclusive_noxus ? 'Sim' : 'Não',
+                label: 'Exclusivo Dev',
+                field: 'exclusive_dev',
+                field: row => row.exclusive_dev ? 'Sim' : 'Não',
                 name: 'parent',
                 sortable: true,
                 align: 'left'

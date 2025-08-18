@@ -11,17 +11,27 @@ export default function notifications() {
         })
     }
 
+    const notifyWarning = (message) => {
+        Notify.create({
+            group: false,
+            message,
+            icon: 'warning',
+            color: 'warning'
+        })
+    }
+
     const notifyError = (message) => {
         Notify.create({
             group: false,
             message,
-            icon: 'report_problem',
+            icon: 'error',
             color: 'negative'
         })
     }
 
     return {
         notifySuccess,
-        notifyError
+        notifyError,
+        notifyWarning
     }
 }

@@ -17,6 +17,7 @@
                         v-model="login.email"
                         label="Email"
                         autocomplete="email"
+                        :rules="[ val => val && val.length > 0 || 'Campo Obrigatório!']"
                     />
                     <q-input
                         class="q-mt-sm"
@@ -25,6 +26,7 @@
                         label="Senha"
                         :type="login.isPwd ? 'password' : 'text'"
                         autocomplete="senha-atual"
+                        :rules="[ val => val && val.length > 0 || 'Campo Obrigatório!']"
                     >
                         <template v-slot:append>
                         <q-icon
@@ -53,6 +55,7 @@
                 style="display: flex; flex-direction: column; align-items: center;"
             >
                 <q-btn
+                    v-if="true==false"
                     outline no-caps class="q-mx-sm q-mb-lg"
                     color="primary" label="Esqueci minha senha"
                     @click="$router.push({ name: 'esqueciSenha' })"
@@ -81,7 +84,13 @@ export default {
     methods: {
         async onSubmit () {
             const { post, setUser, setMenus } = authService('login')
-            const { notifyError } = notifications()
+            const { notifyError, notifyWarning } = notifications()
+
+            if(!this.login.email || !this.login.password){
+                notifyWarning('Os campos email e senha são obirgatórios')
+                return
+            }
+
             const userCredentials = { email: this.login.email, password: this.login.password }
             try {
                 const { data } = await post(userCredentials)       

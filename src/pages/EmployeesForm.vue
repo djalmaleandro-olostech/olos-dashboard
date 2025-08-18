@@ -25,11 +25,17 @@
         :rules="[val => val && val.length > 0 || 'Campo Obrigatório!']"
       />
 
-      <q-input
-        outlined
-        v-model="form.jira_account_id"
-        label="Jira Account ID"
+      <q-select
+        label="Squads"
         class="col-md-6 col-xs-12"
+        outlined
+        v-model="form.squads"
+        :options="squadOptions"
+        option-label="name"
+        option-value="id"
+        emit-value
+        map-options
+        multiple
       />
 
       <q-select
@@ -42,19 +48,6 @@
         emit-value
         map-options
         :rules="[val => !!val || 'Campo Obrigatório!']"
-      />
-
-      <q-select
-        label="Squads"
-        class="col-md-6 col-xs-12"
-        outlined
-        v-model="form.squads"
-        :options="squadOptions"
-        option-label="name"
-        option-value="id"
-        emit-value
-        map-options
-        multiple
       />
 
       <div class="col-lg-12 col-xs-12">
@@ -110,7 +103,6 @@ export default defineComponent({
     const form = ref({
       name: null,
       email: null,
-      jira_account_id: '',
       status: null,
       squads: []
     })
@@ -140,8 +132,7 @@ export default defineComponent({
         form.value = {
           name: data.data.name,
           email: data.data.email,
-          jira_account_id: data.data.jira_account_id || '',
-          status: data.data.status.id,
+          status: data.data.status,
           squads: data.data.squads.map(s => s.id)
         }
       } catch (error) {
@@ -153,8 +144,7 @@ export default defineComponent({
     const makePayload = () => ({
       name: form.value.name,
       email: form.value.email,
-      jira_account_id: form.value.jira_account_id,
-      status: form.value.status,
+      status: form.value.status.id,
       squads: form.value.squads
     })
 

@@ -9,12 +9,24 @@
 					icon="menu"
 					aria-label="Menu"
 					@click="toggleLeftDrawer"
-				/>
+				>
+					<q-tooltip class="bg-primary">Menus</q-tooltip>
+				</q-btn>
         		<q-space />
-				<q-toolbar-title>
+				<q-toolbar-title class="centered-title">
 					Olos Dashboard
 				</q-toolbar-title>
         		<q-space />
+				<q-btn
+					flat
+					dense
+					round
+					icon="account_circle"
+					aria-label="Menu"
+					@click="myAccount"
+				>
+					<q-tooltip class="bg-primary">Minha Conta</q-tooltip>
+				</q-btn>
       		</q-toolbar>
     	</q-header>
     	<q-drawer v-model="leftDrawerOpen" bordered >
@@ -41,6 +53,7 @@ import { defineComponent, ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 import authService from 'src/services/authService'
 import { useRouter } from 'vue-router'
+import MyAccount from 'src/pages/MyAccount.vue'
 
 export default defineComponent({
     name: 'MainLayout',
@@ -51,7 +64,7 @@ export default defineComponent({
 
     setup () {
         const router = useRouter()
-        const leftDrawerOpen = ref(false)
+        const leftDrawerOpen = ref(true)
         const { post, getUser, getMenus, clearAuth } = authService('logout')
         const handleLinkClick = async (route) => {
 			if (route === '/logout' || route === '/login') {
@@ -106,6 +119,9 @@ export default defineComponent({
             leftDrawerOpen,
             toggleLeftDrawer () {
                 leftDrawerOpen.value = !leftDrawerOpen.value
+            },
+			myAccount () {
+                router.push({ name: 'myAccount' })
             },
             handleLinkClick,
 			newLink

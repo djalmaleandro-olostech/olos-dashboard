@@ -74,8 +74,8 @@
                 :rules="[val => !!val || 'Campo Obrigatório!']"
             />
             <q-checkbox
-                v-model="form.exclusive_noxus"
-                label="Exclusivo Noxus"
+                v-model="form.exclusive_dev"
+                label="Exclusivo Dev"
                 class="col-md-4 col-xs-12"
                 :true-value="true"
                 :false-value="false"
@@ -134,7 +134,7 @@ export default defineComponent({
             name: null,
             parent: null,
             route: "",
-            exclusive_noxus: false,
+            exclusive_dev: false,
             status: null
         })
 
@@ -231,7 +231,7 @@ export default defineComponent({
                 route: form.value.route,
                 icon: form.value.icon,
                 order: form.value.order,
-                exclusive_noxus: form.value.exclusive_noxus,
+                exclusive_dev: form.value.exclusive_dev,
                 status: form.value.status.id
             }
             return payload        
