@@ -12,13 +12,22 @@
         v-model="form.name"
         label="Nome do Squad"
         lazy-rules
-        class="col-md-6 col-xs-12"
+        class="col-md-4 col-xs-12"
+        :rules="[val => val && val.length > 0 || 'Campo Obrigatório!']"
+      />
+
+      <q-input
+        outlined
+        v-model="form.project_key"
+        label="Project Key Jira"
+        lazy-rules
+        class="col-md-4 col-xs-12"
         :rules="[val => val && val.length > 0 || 'Campo Obrigatório!']"
       />
 
       <q-select
         label="Status"
-        class="col-md-6 col-xs-12"
+        class="col-md-4 col-xs-12"
         outlined
         v-model="form.status"
         :options="activeInactive"
@@ -78,6 +87,7 @@ export default defineComponent({
 
     const form = ref({
       name: null,
+      project_key: null,
       status: null
     })
 
@@ -135,6 +145,7 @@ export default defineComponent({
 
     const makePayload = () => ({
       name: form.value.name,
+      project_key: form.value.project_key,
       status: form.value.status?.id ?? form.value.status
     })
 
