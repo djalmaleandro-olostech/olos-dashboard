@@ -91,6 +91,13 @@ export default defineComponent({
                 align: 'left'
             },
             {
+                label: 'Project Key Jira',
+                field: 'project_key',
+                name: 'project_key',
+                sortable: true,
+                align: 'left'
+            },
+            {
                 label: 'Status',
                 field: row => row.status.name,
                 name: 'email',

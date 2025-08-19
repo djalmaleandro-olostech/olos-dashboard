@@ -68,6 +68,16 @@ const routes = [
                 component: () => import('src/pages/EmployeesForm.vue')
             },
             {
+                path: 'sprints',
+                name: 'sprints',
+                component: () => import('src/pages/SprintsPage.vue')
+            },
+            {
+                path: 'sprints-form/:id?',
+                name: 'sprintsForm',
+                component: () => import('src/pages/SprintsForm.vue')
+            },
+            {
                 path: 'metrics',
                 name: 'metrics',
                 component: () => import('src/pages/MetricsPage.vue')
