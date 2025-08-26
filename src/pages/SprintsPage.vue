@@ -80,7 +80,6 @@ export default defineComponent({
       { label: 'Data Criação Jira', field: 'created_date_jira', name: 'created_date_jira', sortable: true, align: 'left' },
       { label: 'Data Inicio', field: 'start_date_jira', name: 'start_date_jira', sortable: true, align: 'left' },
       { label: 'Data Fim', field: 'end_date_jira', name: 'end_date_jira', sortable: true, align: 'left' },
-      { label: 'Data Conclusão', field: 'complete_date_jira', name: 'complete_date_jira', sortable: true, align: 'left' },
       { label: 'Jira ID', field: 'jira_id', name: 'jira_id', sortable: true, align: 'left' },
       { label: 'Criado em', field: 'created_at', name: 'created_at', sortable: true, align: 'left' },
       { label: 'Ações', field: 'actions', name: 'actions', align: 'right' }
