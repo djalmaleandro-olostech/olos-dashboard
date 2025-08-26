@@ -9,40 +9,49 @@
 		/>
 		 <q-form class="row q-col-gutter-sm q-mb-md">
             <q-select
-                label="Squad / Projeto"
+                label="Squad"
                 class="col-md-3 col-xs-12"
                 dense
-                v-model="filterData.payment_type"
-                :options="selectOptions.payment_type"
+                v-model="filterData.squad"
+                :options="selectOptions.squads"
                 option-label="name"
                 option-value="id"
-                multiple
+                emit-value
+                map-options
+                @update:model-value="selectFunctions.handleSquadChange"
+            />
+            <q-select
+                label="Sprint"
+                class="col-md-3 col-xs-12"
+                dense
+                v-model="filterData.sprint"
+                :options="selectOptions.sprints"
+                option-label="name"
+                option-value="id"
                 emit-value
                 map-options
             />
             <q-select
-                label="Board"
+                label="Colaboradores"
                 class="col-md-3 col-xs-12"
                 dense
-                v-model="filterData.category"
-                :options="selectOptions.category"
+                v-model="filterData.employees"
+                :options="selectOptions.employees"
                 option-label="name"
                 option-value="id"
                 multiple
                 emit-value
                 map-options
+                @update:model-value="selectFunctions.handleEmployeeChange"
             />
-			<q-select
-                label="Sprint"
-                class="col-md-3 col-xs-12"
-                dense
-                v-model="filterData.category"
-                :options="selectOptions.category"
-                option-label="name"
-                option-value="id"
-                multiple
-                emit-value
-                map-options
+            <q-btn
+                :disabled="filterData.sprint == null || loading"
+                class="col-md-2 offset-md-1 col-xs-12 q-mt-md"
+                size="sm"
+                :loading="loading"
+                color="primary"
+                label="Obter Métricas"
+                @click="getMetrics"
             />
         </q-form>
 		<div class="row q-col-gutter-md q-mt-lg">
@@ -50,7 +59,7 @@
 			<div class="col-12 col-md-12">
 				<q-card>
 					<q-card-section style="height: 50vh;">
-						<div class="text-subtitle1">Estimado x Real + Bugs </div>
+						<div class="text-subtitle1">Estimado x Real + Bugs</div>
 						<apexchart
 							height="95%"
 							type="bar"
@@ -61,6 +70,65 @@
 				</q-card>
 			</div>
 		</div>
+       <q-card class="q-mt-lg">
+            <q-card-section>
+                <div class="text-subtitle1">Detalhe de Tarefas</div>
+            </q-card-section>
+
+             <q-table
+                :rows="rows"
+                :columns="columns"
+                row-key="name"
+            >
+                <template v-slot:body-cell-key="props">
+                    <q-td :props="props">
+                        <a 
+                            :href="`https://olostecnologia.atlassian.net/browse/${props.row.key}`" 
+                            target="_blank" 
+                            class="text-primary text-bold"
+                        >
+                            {{ props.row.key }}
+                        </a>
+                    </q-td>
+                </template>
+            </q-table>
+        </q-card>
+        <q-card class="q-mt-lg">
+            <q-card-section>
+                <div class="text-subtitle1">Bugs</div>
+            </q-card-section>
+
+            <q-table
+                :rows="bugsRows"
+                :columns="bugsColumns"
+                row-key="name"
+            >
+                <template v-slot:body-cell-key="props">
+                    <q-td :props="props">
+                        <a 
+                            :href="`https://olostecnologia.atlassian.net/browse/${props.row.key}`" 
+                            target="_blank" 
+                            class="text-primary text-bold"
+                        >
+                            {{ props.row.key }}
+                        </a>
+                    </q-td>
+                    
+                </template>
+                <template v-slot:body-cell-parentkey="props">
+                    <q-td :props="props">
+                        <a 
+                            :href="`https://olostecnologia.atlassian.net/browse/${props.row.parentkey}`" 
+                            target="_blank" 
+                            class="text-primary text-bold"
+                        >
+                            {{ props.row.parentkey }}
+                        </a>
+                    </q-td>
+                    
+                </template>
+            </q-table>
+        </q-card>
     </div>
 </template>
 
@@ -68,12 +136,15 @@
 import ApexChart from 'vue3-apexcharts'
 import { defineComponent, ref, onMounted } from 'vue'
 import ViewHeader from 'components/ViewHeader.vue'
+import squadsService from 'src/services/squadsService'
+import metricsService from 'src/services/metricsService'
+import employeesService from 'src/services/employeesService'
+import sprintsService from 'src/services/sprintsService'
+import notifications from '../utils/notifications'
 
 const headerProps = {
     title: 'Metricas',
-    btnTo: 'rolesForm',
     btnIcon: 'add',
-    btnName: 'Adicionar'
 }
 
 export default defineComponent({
@@ -86,24 +157,109 @@ export default defineComponent({
         }
     },
     setup () {
+        const { list } = metricsService()
+        const { list: listSquads } = squadsService()
+        const { list: listEmployees } = employeesService()
+        const { list: listSprints } = sprintsService()
+        const { notifyError } = notifications()
+        const loading = ref(false);
+        const rows = ref([])
+        const bugsRows = ref([])
+        const columns = [
+            { label: 'Tarefa', field: 'key', name: 'key', sortable: true, align: 'left' },
+            { label: 'Colaborador', field: 'employee_name', name: 'employee_name', sortable: true, align: 'left' },
+            { label: 'Estimado (h)', field: 'estimate_hours', name: 'estimate_hours', sortable: true, align: 'left' },
+            { label: 'Real (h)', field: 'spent_hours', name: 'spent_hours', sortable: true, align: 'left' },
+            { label: 'Desvio (%)', field: 'deviation', name: 'deviation', sortable: true, align: 'left' },
+        ];
+
+        const bugsColumns = [
+            { label: 'Tarefa', field: 'key', name: 'key', sortable: true, align: 'left' },
+            { label: 'História', field: 'parentkey', name: 'parentkey', sortable: true, align: 'left' },
+            { label: 'Colaborador', field: 'employee_name', name: 'employee_name', sortable: true, align: 'left' },
+            { label: 'Real (h)', field: 'spent_hours', name: 'spent_hours', sortable: true, align: 'left' },
+        ];
 
 	 	const filterData = ref({
-            type: 'all',
-            payment_type: ['all'],
-            refresh: { payment_type: false, category: false },
-            category: ['all']
+            squad: null,
+            employees: [],
+            sprint: null,
         })
 
 		const selectOptions = ref({
-            payment_type: [
-                {id: 'all', name: 'Todos'},
-                {id: 'single', name: 'Único'},
-                {id: 'installment', name: 'Parcelado'},
-                {id: 'recurrent', name: 'Recorrente'}
-            ],
-            category: []
+            squads: [],
+            employees: [],
+            sprints: [],
         });
+        
+        onMounted(async () => {
+            getSquads();
+		})
 
+        const getSquads = async () => {
+            try {
+                const squads = await listSquads()		
+                selectOptions.value.squads = squads.data.data
+            } catch (error) {
+                notifyError('Erro ao carregar categorias ou contas.')
+            }
+        }
+
+        const getEmployees = async (squadId) => {
+            try {
+                const employees = await listEmployees("", {squad_id: squadId})		
+                selectOptions.value.employees = [
+                    { id: "all", name: "Todos" }, 
+                    ...employees.data.data
+                ];
+                filterData.value.employees = ["all"];
+            } catch (error) {
+                notifyError('Erro ao carregar categorias ou contas.')
+            }
+        }
+
+        const getSprints = async (squadId) => {
+            try {
+                const sprints = await listSprints("", {squad_id: squadId})		
+                selectOptions.value.sprints = sprints.data.data;
+                filterData.value.sprint = sprints.data.data[0].id;
+            } catch (error) {
+                notifyError('Erro ao carregar categorias ou contas.')
+            }
+        }
+
+        const getMetrics = async () => {
+            loading.value = true;
+            try {
+                const { data } = await list('', getReqParams());
+                console.log(data.data);
+                
+                rows.value = data.data.table_data;
+                bugsRows.value = data.data.table_data_bugs;
+			    updateChartData(data.data.metrics)
+                
+            } catch (error) {
+                console.error(error); 
+                notifyError('Erro ao obter métricas.')
+            } finally {
+                loading.value = false; // re-enable button
+            }
+        }        
+
+         const getReqParams = () => {
+           
+            const queryParams = {
+                sprint: filterData.value.sprint,
+                employees: [...filterData.value.employees]
+            };
+
+            if(filterData.value.employees[0] == 'all'){
+                queryParams.employees = selectOptions.value.employees
+                    .filter(emp => emp.id !== "all").map(emp => emp.id);
+            };
+
+            return queryParams;
+        }
     
 		const categories = ref([])
 		const series1 = ref([])
@@ -133,27 +289,37 @@ export default defineComponent({
 			}
 		}
 
-        onMounted(async () => {
-		//const response = await fetch('/api/performance')
-		//const data = await response.json()
-		const data = [
-				{ "name": "User 1", "est": 5, "real": 4, "bugs": 1 },
-				{ "name": "User 2", "est": 8, "real": 9, "bugs": 3 },
-				{ "name": "User 3", "est": 6, "real": 5, "bugs": 2 },
-				{ "name": "User 4", "est": 7, "real": 8, "bugs": 4 },
-				{ "name": "User 2", "est": 8, "real": 9, "bugs": 3 },
-				{ "name": "User 2", "est": 8, "real": 9, "bugs": 3 },
-				{ "name": "User 2", "est": 8, "real": 9, "bugs": 3 },
-				{ "name": "User 2", "est": 8, "real": 9, "bugs": 3 },
-				{ "name": "User 2", "est": 8, "real": 9, "bugs": 3 },
-			];
-			updateChartData(data)
-		})
 
+        const selectFunctions = {
+			handleSquadChange: (squadId) => {
+                getEmployees(squadId);
+                getSprints(squadId);
+			},
+
+            handleEmployeeChange: (selected) => {                
+                if (selected.length == 0 || selected.at(-1) == "all") {
+                    filterData.value.employees = ["all"];                 
+                    return;
+                }
+
+                filterData.value.employees = selected.filter(id => id !== "all");
+
+                if (filterData.value.employees.length === selectOptions.value.employees.length - 1) {
+                    filterData.value.employees = ["all"];
+                }
+            } 
+        }
     
         return {
             headerProps,
+            loading,
 			filterData,
+            columns,
+            bugsColumns,
+            rows,
+            bugsRows,
+            selectFunctions,
+            getMetrics,
 			selectOptions,
 			chartOptions1,
 			series1

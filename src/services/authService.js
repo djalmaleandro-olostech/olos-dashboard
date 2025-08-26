@@ -7,7 +7,6 @@ const menus = ref(JSON.parse(localStorage.getItem('menus')) || [])
 export default function authService(url = '') {
     const { post } = useApi(`auth/${url}`)
     const meApi = useApi('auth/me')
-    const refreshApi = useApi('auth/refresh')
 
     function setUser(userValue) {
         localStorage.setItem('user', JSON.stringify(userValue))
@@ -35,14 +34,23 @@ export default function authService(url = '') {
     function clearAuth() {
         localStorage.removeItem('user')
         localStorage.removeItem('menus')
+        localStorage.removeItem('lastVerify')
         user.value = null
         menus.value = []
     }
 
     async function verifyToken() {
+        const now = Date.now()
+        const lastVerify = parseInt(localStorage.getItem('lastVerify') || '0', 10)
+
+        if (now - lastVerify < 60 * 1000 && user.value) {
+            return true
+        }
+
         try {
             const { data } = await meApi.post()
             setUser(data)
+            localStorage.setItem('lastVerify', now.toString())
             return true
         } catch (error) {
             clearAuth()
@@ -50,13 +58,6 @@ export default function authService(url = '') {
         }
     }
 
-    async function refreshToken() {
-        try {
-            await refreshApi.post()
-        } catch (error) {
-            clearAuth()
-        }
-    }
 
     return {
         isAuthenticated,
@@ -70,7 +71,6 @@ export default function authService(url = '') {
         getUser,
         getMenus,
         clearAuth,
-        verifyToken,
-        refreshToken
+        verifyToken
     }
 }
