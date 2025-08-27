@@ -74,12 +74,21 @@
             <q-card-section>
                 <div class="text-subtitle1">Detalhe de Tarefas</div>
             </q-card-section>
-
              <q-table
                 :rows="rows"
                 :columns="columns"
                 row-key="name"
             >
+                <template v-slot:top-right>
+					<q-btn
+                        :disabled="rows.length < 1 && bugsRows.length < 1"
+                        label="Exportar PDF" 
+                        icon="picture_as_pdf"
+                        size="sm"
+						color="primary"
+                        @click="exportPDF"
+					/>
+				</template>
                 <template v-slot:body-cell-key="props">
                     <q-td :props="props">
                         <a 
@@ -103,6 +112,7 @@
                 :columns="bugsColumns"
                 row-key="name"
             >
+
                 <template v-slot:body-cell-key="props">
                     <q-td :props="props">
                         <a 
@@ -141,6 +151,8 @@ import metricsService from 'src/services/metricsService'
 import employeesService from 'src/services/employeesService'
 import sprintsService from 'src/services/sprintsService'
 import notifications from '../utils/notifications'
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const headerProps = {
     title: 'Metricas',
@@ -309,6 +321,45 @@ export default defineComponent({
                 }
             } 
         }
+
+        const exportPDF = () => {
+            const doc = new jsPDF();
+
+            const sprint = selectOptions.value.sprints.find(
+                item => item.id === filterData.value.sprint
+            );
+
+            let titleTasks = false;
+            let titleBugs = false;
+
+            autoTable(doc, {
+                head: [columns.map(col => col.label)],
+                body: rows.value.map(row => columns.map(col => row[col.field])),
+                startY: 20,
+                didDrawPage: (data) => {
+                    if (!titleTasks) {
+                        doc.setFontSize(14);
+                        doc.text(`Detalhe de Tarefas - ${sprint.name}`, 14, 15);
+                        titleTasks = true;
+                    }
+                }
+            });
+
+            autoTable(doc, {
+                head: [bugsColumns.map(col => col.label)],
+                body: bugsRows.value.map(row => bugsColumns.map(col => row[col.field])),
+                startY: doc.lastAutoTable.finalY + 15,
+                didDrawPage: (data) => {
+                    if (!titleBugs) {
+                        doc.setFontSize(14);
+                        doc.text(`Bugs - ${sprint.name}`, 14, doc.lastAutoTable.finalY + 10);
+                        titleBugs = true;
+                    }
+                }
+            });
+
+            doc.save(`${sprint?.name || "sprint"}_metricas.pdf`);
+        };
     
         return {
             headerProps,
@@ -320,6 +371,7 @@ export default defineComponent({
             bugsRows,
             selectFunctions,
             getMetrics,
+            exportPDF,
 			selectOptions,
 			chartOptions1,
 			series1
