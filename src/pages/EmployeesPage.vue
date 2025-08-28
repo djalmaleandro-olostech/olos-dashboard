@@ -101,6 +101,7 @@ export default defineComponent({
 			{ label: 'ID', field: 'id', name: 'id', sortable: true, align: 'left' },
 			{ label: 'Nome', field: 'name', name: 'name', sortable: true, align: 'left' },
 			{ label: 'Email', field: 'email', name: 'email', sortable: true, align: 'left' },
+			{ label: 'Cargo', field: row => row.role.name, name: 'role', sortable: true, align: 'left' },
 			{
 				label: 'Squads',
 				field: row => row.squads && row.squads.length > 0 

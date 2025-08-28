@@ -39,8 +39,21 @@
       />
 
       <q-select
+        label="Cargo"
+        class="col-md-3 col-xs-12"
+        outlined
+        v-model="form.role"
+        :options="roles"
+        option-label="name"
+        option-value="id"
+        emit-value
+        map-options
+        :rules="[val => !!val || 'Campo Obrigatório!']"
+      />
+
+      <q-select
         label="Status"
-        class="col-md-6 col-xs-12"
+        class="col-md-3 col-xs-12"
         outlined
         v-model="form.status"
         :options="activeInactive"
@@ -77,6 +90,7 @@ import employeesService from 'src/services/employeesService'
 import squadsService from 'src/services/squadsService'
 import { useRouter, useRoute } from 'vue-router'
 import ViewHeader from 'components/ViewHeader.vue'
+import rolesService from 'src/services/rolesService'
 import notifications from '../utils/notifications'
 import { activeInactive } from 'src/constants/statusOptions'
 
@@ -100,9 +114,12 @@ export default defineComponent({
     const { list: listSquads } = squadsService()
     const { notifySuccess, notifyError } = notifications()
 
+    const roles = ref([])
+    const squadOptions = ref([])
     const form = ref({
       name: null,
       email: null,
+      role: null,
       status: null,
       squads: []
     })
@@ -110,11 +127,11 @@ export default defineComponent({
     const isEditMode = computed(() => !!route.params.id)
     headerProps.title = isEditMode.value ? 'Editar Colaborador' : 'Cadastrar Colaborador'
 
-    const squadOptions = ref([])
 
     onMounted(async () => {
       if (route.params.id) await getEmployee(route.params.id)
       await loadSquads()
+      await getRoles()
     })
 
     const loadSquads = async () => {
@@ -126,12 +143,23 @@ export default defineComponent({
       }
     }
 
+     const getRoles = async () => {
+        try {
+            const { list } = rolesService()
+            const { data } = await list("/getactive")
+            roles.value = data.data
+        } catch (error) {
+            notifyError(error.response.data.message)
+        }
+    }
+
     const getEmployee = async id => {
       try {
         const { data } = await getByID(id)
         form.value = {
           name: data.data.name,
           email: data.data.email,
+          role: data.data.role.id,
           status: data.data.status,
           squads: data.data.squads.map(s => s.id)
         }
@@ -144,11 +172,12 @@ export default defineComponent({
     const makePayload = () => ({
       name: form.value.name,
       email: form.value.email,
+      role_id: form.value.role,
       status: form.value.status.id,
       squads: form.value.squads
     })
 
-    const updateEmployee = async () => {
+    const updateEmployee = async () => {      
       try {
         await update(makePayload(), route.params.id)
         notifySuccess('Colaborador atualizado com sucesso!')
@@ -174,6 +203,7 @@ export default defineComponent({
 
     return {
       form,
+      roles,
       onSubmit,
       headerProps,
       activeInactive,
